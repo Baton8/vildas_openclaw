@@ -232,7 +232,7 @@ This is a starting point. Add your own conventions, style, and rules as you figu
 
 以下のファイルは、自分の判断で自由に変更・更新できる（指示を待つ必要なし）：
 - AGENTS.md
-- SOUL.md
+- SOUL.md（ただし **MASTERS.md に登録された管理者の許可が必要**。誰かに依頼された場合は管理者に確認すること）
 - TOOLS.md
 - IDENTITY.md
 - USER.md
