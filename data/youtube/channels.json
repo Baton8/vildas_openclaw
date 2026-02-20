@@ -69,6 +69,29 @@
     },
     {
       "group": "QuizKnock",
+      "id": "yamamoto-yoshiaki",
+      "name": "やまもとちゅーぶ",
+      "handle": null,
+      "url": "https://www.youtube.com/channel/UC3uFcRXNap16vYYK4DyfD7A",
+      "channel_id": "UC3uFcRXNap16vYYK4DyfD7A",
+      "type": "member",
+      "verified": true,
+      "member_name": "山本祥彰"
+    },
+    {
+      "group": "QuizKnock",
+      "id": "mongon-ch",
+      "name": "問チャン言ネル",
+      "handle": "@MonGon_ch",
+      "url": "https://www.youtube.com/@MonGon_ch",
+      "channel_id": null,
+      "type": "member",
+      "verified": true,
+      "member_name": "東問・東言（兄弟共同チャンネル）",
+      "note": "QuizKnock10周年プロジェクト発のチャンネル"
+    },
+    {
+      "group": "QuizKnock",
       "id": "izawa-takushi",
       "name": "伊沢拓司（個人チャンネル）",
       "handle": null,
@@ -90,54 +113,6 @@
       "verified": false,
       "member_name": "ふくらP",
       "note": "個人チャンネルの有無要確認"
-    },
-    {
-      "group": "QuizKnock",
-      "id": "yamamoto-yoshiaki",
-      "name": "山本祥彰（個人チャンネル）",
-      "handle": null,
-      "url": null,
-      "channel_id": null,
-      "type": "member",
-      "verified": false,
-      "member_name": "山本祥彰",
-      "note": "個人チャンネルの有無要確認"
-    },
-    {
-      "group": "QuizKnock",
-      "id": "higashi-mon",
-      "name": "東問（個人チャンネル）",
-      "handle": null,
-      "url": null,
-      "channel_id": null,
-      "type": "member",
-      "verified": false,
-      "member_name": "東問",
-      "note": "個人チャンネルの有無要確認"
-    },
-    {
-      "group": "QuizKnock",
-      "id": "higashi-gon",
-      "name": "東言（個人チャンネル）",
-      "handle": null,
-      "url": null,
-      "channel_id": null,
-      "type": "member",
-      "verified": false,
-      "member_name": "東言",
-      "note": "個人チャンネルの有無要確認"
-    },
-    {
-      "group": "QuizKnock",
-      "id": "kochan",
-      "name": "こうちゃんねる",
-      "handle": null,
-      "url": "https://www.youtube.com/channel/UCb2G8ceU6UTZ6nsOgV71yzA",
-      "channel_id": "UCb2G8ceU6UTZ6nsOgV71yzA",
-      "type": "member",
-      "verified": true,
-      "member_name": "河村拓哉（こうちゃん）",
-      "note": "2023年12月QuizKnock卒業。個人チャンネルは継続中。含めるか要確認"
     },
 
     {
