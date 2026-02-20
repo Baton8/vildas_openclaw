@@ -1,2 +1,3 @@
 # 動画メタデータ（1行1動画のJSONL形式）
 # フォーマット: {"video_id":"...", "channel_id":"...", "title":"...", "published_at":"YYYY-MM-DD", "analyzed_at":"YYYY-MM-DD", "has_transcript":true/false}
+{"video_id": "3i-SH93mr0E", "channel_id": "quizknock-main", "url": "https://www.youtube.com/watch?v=3i-SH93mr0E", "title": "無限ホテルパラドックス", "analyzed_at": "2026-02-20", "has_transcript": false}
