@@ -11,7 +11,7 @@ const path = require('path')
 const url = require('url')
 
 const SITES_DIR = process.env.SITES_DIR || path.join(process.env.HOME, 'sites')
-const PORT = parseInt(process.env.PORT || '3000', 10)
+const PORT = parseInt(process.env.PORT || '4126', 10)
 
 const MIME_TYPES = {
   '.html': 'text/html; charset=utf-8',

@@ -37,19 +37,19 @@ pm2 delete sites-server 2>/dev/null || true
 pm2 start "$SCRIPT_DIR/server.js" \
   --name "sites-server" \
   --env SITES_DIR="$SITES_DIR" \
-  --env PORT=3000
+  --env PORT=4126
 
 pm2 save
 
 echo ""
 echo "✅ セットアップ完了！"
 echo ""
-echo "   🌐 サーバー: http://localhost:3000"
+echo "   🌐 サーバー: http://localhost:4126"
 echo "   📁 ファイル置き場: ~/sites/"
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo "💡 使い方:"
-echo "   ~/sites/tool-name/index.html → http://localhost:3000/tool-name/"
+echo "   ~/sites/tool-name/index.html → http://localhost:4126/tool-name/"
 echo ""
 echo "💡 オプション: meta.json でツール名・説明をカスタマイズ"
 echo "   ~/sites/tool-name/meta.json:"

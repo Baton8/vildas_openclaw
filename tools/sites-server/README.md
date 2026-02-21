@@ -9,7 +9,7 @@
 bash ~/.openclaw/workspace/tools/sites-server/setup.sh
 ```
 
-Node.js と pm2 が自動セットアップされ、ポート 3000 でサーバーが起動する。
+Node.js と pm2 が自動セットアップされ、ポート 4126 でサーバーが起動する。
 
 ### Mac 再起動後も自動起動させる
 
@@ -28,15 +28,15 @@ pm2 save
 ```
 ~/sites/
 ├── quiz-game/
-│   ├── index.html      → http://localhost:3000/quiz-game/
+│   ├── index.html      → http://localhost:4126/quiz-game/
 │   └── meta.json       （オプション）
 ├── timer/
-│   ├── index.html      → http://localhost:3000/timer/
+│   ├── index.html      → http://localhost:4126/timer/
 │   └── meta.json
 └── ...
 ```
 
-`http://localhost:3000/` にアクセスするとツール一覧が自動生成される。
+`http://localhost:4126/` にアクセスするとツール一覧が自動生成される。
 
 ### meta.json（オプション）
 
@@ -65,10 +65,10 @@ pm2 stop sites-server     # 停止
 
 ## Cloudflare Tunnel との連携
 
-すでにセットアップ済みの Cloudflare Tunnel で `localhost:3000` を公開するだけ：
+すでにセットアップ済みの Cloudflare Tunnel で `localhost:4126` を公開するだけ：
 
 ```bash
-cloudflared tunnel --url http://localhost:3000
+cloudflared tunnel --url http://localhost:4126
 ```
 
 または `config.yml` で固定ドメインを設定して使う。
