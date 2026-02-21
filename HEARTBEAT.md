@@ -12,6 +12,16 @@
 
 ---
 
+### 毎朝 8:00〜8:59 JST（1日1回）
+
+**「今日のQuizKnock」を生成・投稿する** — `skills/quizknock-daily/SKILL.md` を参照して実行する。
+
+- 現在時刻が 8:00〜8:59 JST の場合のみ実行
+- `skills/quizknock-daily/log/YYYY-MM-DD.md` が既に存在する場合はスキップ（重複防止）
+- 存在しない場合：スキルを読んで投稿を生成 → `#vil_botan_lab`（C0AFYPKLTK5）のスレッド `1771641971.913779` にリプライ投稿する
+
+---
+
 ### セッション開始時（毎回）
 - `git pull` で最新の状態に同期する
   ```bash
