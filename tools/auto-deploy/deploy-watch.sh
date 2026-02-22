@@ -2,6 +2,9 @@
 # ぼたんportalの自動デプロイスクリプト
 # git pullして変更があったらpm2 restartする（ビルドはsandbox側で完了済み）
 
+# launchdはPATHが最小限なのでVolta等を手動で追加
+export PATH="$HOME/.volta/bin:$HOME/.npm-global/bin:/usr/local/bin:$PATH"
+
 WORKSPACE="$HOME/.openclaw/workspace"
 LOG="$HOME/.openclaw/deploy-watch.log"
 
