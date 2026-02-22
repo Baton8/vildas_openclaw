@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚛️ 量子五目並べ</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a1a2e;
+      color: #eee;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      overflow-x: hidden;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      font-weight: 800;
+      background: linear-gradient(135deg, #a0c4ff, #ffd6a5, #a0c4ff);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    header p { color: #888; font-size: 0.8rem; margin-top: 4px; }
+
+    /* ===== Layout ===== */
+    .game-wrap {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    /* ===== Player Panels ===== */
+    .player-panel {
+      width: 168px;
+      background: #16213e;
+      border: 2px solid #2a2a4a;
+      border-radius: 16px;
+      padding: 16px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      flex-shrink: 0;
+    }
+    .player-panel.active-turn {
+      border-color: #f0a030;
+      box-shadow: 0 0 16px rgba(240, 160, 48, 0.25);
+    }
+    .panel-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .panel-stone-preview {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    }
+    .p1 .panel-stone-preview { background: radial-gradient(circle at 35% 35%, #555, #000); }
+    .p2 .panel-stone-preview { background: radial-gradient(circle at 35% 35%, #fff, #bbb); }
+    .panel-title h2 { font-size: 0.95rem; font-weight: 700; }
+
+    /* tokens */
+    .tokens-row { margin-bottom: 12px; }
+    .tokens-label { font-size: 0.72rem; color: #888; margin-bottom: 5px; }
+    .token-dots { display: flex; gap: 4px; }
+    .token-dot {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      background: #f0a030;
+      box-shadow: 0 0 6px rgba(240,160,48,0.5);
+      transition: all 0.3s;
+    }
+    .token-dot.used { background: #333; box-shadow: none; }
+
+    /* stone type selector */
+    .stone-selector { margin-bottom: 12px; }
+    .stone-selector-label { font-size: 0.72rem; color: #888; margin-bottom: 5px; }
+    .stone-btns { display: flex; gap: 6px; }
+    .stone-btn {
+      flex: 1;
+      padding: 7px 4px;
+      border-radius: 8px;
+      border: 2px solid #333;
+      background: transparent;
+      color: #888;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .stone-btn.sel { border-color: #f0a030; color: #f0a030; background: rgba(240,160,48,0.08); }
+    .stone-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    /* observe button */
+    .observe-btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 10px;
+      border: none;
+      background: #0f3460;
+      color: #7eb8ff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.02em;
+    }
+    .observe-btn:hover:not(:disabled) { background: #1a4a80; color: #aad4ff; }
+    .observe-btn:disabled { background: #1a1a2e; color: #444; cursor: not-allowed; border: 1px solid #2a2a4a; }
+
+    /* ===== Board area ===== */
+    .board-area { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+
+    #board-canvas {
+      display: block;
+      border-radius: 6px;
+      cursor: crosshair;
+      max-width: 100%;
+      height: auto;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    #board-canvas.no-cursor { cursor: default; }
+
+    .status-bar {
+      text-align: center;
+      font-size: 1rem;
+      font-weight: 600;
+      min-height: 28px;
+      color: #ccc;
+      transition: color 0.2s;
+    }
+    .status-bar.win { color: #ffd700; font-size: 1.15rem; }
+
+    .bottom-btns { display: flex; gap: 10px; }
+    .btn-restart {
+      padding: 9px 28px;
+      border-radius: 24px;
+      border: 1px solid #444;
+      background: transparent;
+      color: #aaa;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .btn-restart:hover { background: #2a2a4a; color: #eee; border-color: #666; }
+
+    /* ===== Rules ===== */
+    .rules {
+      margin-top: 24px;
+      max-width: 700px;
+      background: #16213e;
+      border-radius: 14px;
+      padding: 16px 20px;
+      font-size: 0.78rem;
+      color: #777;
+      line-height: 1.7;
+      border: 1px solid #2a2a4a;
+    }
+    .rules h3 { color: #aaa; font-size: 0.85rem; margin-bottom: 8px; }
+    .rules b { color: #bbb; }
+
+    /* ===== Observation overlay ===== */
+    #obs-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0,0,0,0.6);
+      z-index: 10;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #obs-overlay.show { display: flex; }
+    #obs-msg {
+      font-size: 2rem;
+      font-weight: 800;
+      text-align: center;
+      text-shadow: 0 0 20px currentColor;
+      animation: pulse 0.6s ease-in-out infinite alternate;
+    }
+    @keyframes pulse { from { opacity: 0.7; } to { opacity: 1; } }
+    #obs-sub { color: #aaa; font-size: 0.95rem; }
+
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚛️ 量子五目並べ</h1>
+    <p>色が確定していない碁石で遊ぶ五目並べ（QuizKnock発案）</p>
+  </header>
+
+  <div class="game-wrap">
+    <!-- Player 1 -->
+    <div class="player-panel p1" id="panel1">
+      <div class="panel-title">
+        <div class="panel-stone-preview"></div>
+        <h2>Player 1<br>⬛ 黒担当</h2>
+      </div>
+      <div class="tokens-row">
+        <div class="tokens-label">観測トークン</div>
+        <div class="token-dots" id="tokens1"></div>
+      </div>
+      <div class="stone-selector">
+        <div class="stone-selector-label">石の強さ（自分の番のみ）</div>
+        <div class="stone-btns">
+          <button class="stone-btn sel" id="sb1-90" onclick="selectType(1,'90')">90%</button>
+          <button class="stone-btn" id="sb1-70" onclick="selectType(1,'70')">70%</button>
+        </div>
+      </div>
+      <button class="observe-btn" id="obs1" onclick="observe(1)">🔬 観測する</button>
+    </div>
+
+    <!-- Board -->
+    <div class="board-area">
+      <canvas id="board-canvas"></canvas>
+      <div class="status-bar" id="status">Player 1（黒）の番です</div>
+      <div class="bottom-btns">
+        <button class="btn-restart" onclick="restart()">🔄 最初から</button>
+      </div>
+    </div>
+
+    <!-- Player 2 -->
+    <div class="player-panel p2" id="panel2">
+      <div class="panel-title">
+        <div class="panel-stone-preview"></div>
+        <h2>Player 2<br>⬜ 白担当</h2>
+      </div>
+      <div class="tokens-row">
+        <div class="tokens-label">観測トークン</div>
+        <div class="token-dots" id="tokens2"></div>
+      </div>
+      <div class="stone-selector">
+        <div class="stone-selector-label">石の強さ（自分の番のみ）</div>
+        <div class="stone-btns">
+          <button class="stone-btn sel" id="sb2-90" onclick="selectType(2,'90')">90%</button>
+          <button class="stone-btn" id="sb2-70" onclick="selectType(2,'70')">70%</button>
+        </div>
+      </div>
+      <button class="observe-btn" id="obs2" onclick="observe(2)">🔬 観測する</button>
+    </div>
+  </div>
+
+  <div class="rules">
+    <h3>🔬 遊び方</h3>
+    交互に碁石を盤面に置きます。ただし<b>置いた瞬間は色が確定しません</b>。<br>
+    <b>90%石</b>：観測時に自分の色になる確率 90%（相手色になる確率 10%）<br>
+    <b>70%石</b>：観測時に自分の色になる確率 70%（相手色になる確率 30%）<br>
+    ⚠️ <b>90%石を置いた直後は、次のターンで必ず70%石を置かなければなりません</b><br><br>
+    「五目できたかも？」と思ったら <b>観測ボタン</b> を押します（トークン1個消費）。<br>
+    全ての石の色が確率に従って確定し、五目があれば勝利！<br>
+    両方に五目ができていた場合は<b>観測した側の勝ち</b>。観測は1人5回まで。
+  </div>
+
+  <!-- Observation overlay -->
+  <div id="obs-overlay">
+    <div id="obs-msg"></div>
+    <div id="obs-sub"></div>
+  </div>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const BS = 15;          // board size
+    const CELL = 42;        // pixels per cell
+    const PAD  = 32;        // board padding
+    const R    = CELL * 0.44; // stone radius
+    const CSIZE = CELL * (BS - 1) + PAD * 2;
+
+    const canvas = document.getElementById('board-canvas');
+    const ctx    = canvas.getContext('2d');
+    canvas.width  = CSIZE;
+    canvas.height = CSIZE;
+
+    // ===== State =====
+    let board;         // null | { player:1|2, type:'90'|'70', obs:null|'black'|'white' }
+    let current;       // 1 | 2
+    let must70;        // { 1:bool, 2:bool }
+    let selType;       // { 1:'90'|'70', 2:'90'|'70' }
+    let tokens;        // { 1:number, 2:number }
+    let gameOver;
+    let busy;          // animation in progress
+    let hoverCell;     // { r, c } | null
+
+    // ===== Init =====
+    function restart() {
+      board    = Array.from({length: BS}, () => Array(BS).fill(null));
+      current  = 1;
+      must70   = { 1: false, 2: false };
+      selType  = { 1: '90', 2: '90' };
+      tokens   = { 1: 5, 2: 5 };
+      gameOver = false;
+      busy     = false;
+      hoverCell = null;
+      canvas.classList.remove('no-cursor');
+      document.getElementById('status').classList.remove('win');
+      hideOverlay();
+      syncUI();
+      render();
+      setStatus('Player 1（黒）の番です');
+    }
+
+    // ===== UI helpers =====
+    function setStatus(msg, win = false) {
+      const el = document.getElementById('status');
+      el.textContent = msg;
+      el.classList.toggle('win', win);
+    }
+
+    function syncUI() {
+      // Active panel highlight
+      [1, 2].forEach(p => {
+        const panel = document.getElementById(`panel${p}`);
+        panel.classList.toggle('active-turn', p === current && !gameOver && !busy);
+      });
+
+      // Token dots
+      [1, 2].forEach(p => {
+        const el = document.getElementById(`tokens${p}`);
+        el.innerHTML = '';
+        for (let i = 0; i < 5; i++) {
+          const d = document.createElement('div');
+          d.className = 'token-dot' + (i >= tokens[p] ? ' used' : '');
+          el.appendChild(d);
+        }
+      });
+
+      // Stone buttons
+      [1, 2].forEach(p => {
+        const isMyTurn = p === current && !gameOver && !busy;
+        const must = must70[p];
+        const b90 = document.getElementById(`sb${p}-90`);
+        const b70 = document.getElementById(`sb${p}-70`);
+        b90.disabled = !isMyTurn || must;
+        b70.disabled = !isMyTurn;
+        b90.classList.toggle('sel', selType[p] === '90');
+        b70.classList.toggle('sel', selType[p] === '70');
+      });
+
+      // Observe buttons
+      [1, 2].forEach(p => {
+        const btn = document.getElementById(`obs${p}`);
+        const ok = !gameOver && !busy && tokens[p] > 0;
+        btn.disabled = !ok;
+        btn.textContent = `🔬 観測（残り${tokens[p]}）`;
+      });
+    }
+
+    // ===== Stone type selection =====
+    window.selectType = (player, type) => {
+      if (player !== current || gameOver || busy) return;
+      if (type === '90' && must70[player]) {
+        setStatus('90%石の次は必ず70%石！');
+        return;
+      }
+      selType[player] = type;
+      syncUI();
+    };
+
+    // ===== Click to place stone =====
+    canvas.addEventListener('mousemove', (e) => {
+      if (gameOver || busy) { hoverCell = null; return; }
+      const { r, c } = eventToCell(e);
+      if (r < 0 || r >= BS || c < 0 || c >= BS || board[r][c]) {
+        hoverCell = null;
+      } else {
+        hoverCell = { r, c };
+      }
+      render();
+    });
+
+    canvas.addEventListener('mouseleave', () => {
+      hoverCell = null;
+      render();
+    });
+
+    canvas.addEventListener('click', (e) => {
+      if (gameOver || busy) return;
+      const { r, c } = eventToCell(e);
+      if (r < 0 || r >= BS || c < 0 || c >= BS) return;
+      if (board[r][c]) return;
+      placeStone(r, c);
+    });
+
+    function eventToCell(e) {
+      const rect = canvas.getBoundingClientRect();
+      const sx = canvas.width  / rect.width;
+      const sy = canvas.height / rect.height;
+      const x = (e.clientX - rect.left) * sx;
+      const y = (e.clientY - rect.top)  * sy;
+      const c = Math.round((x - PAD) / CELL);
+      const r = Math.round((y - PAD) / CELL);
+      return { r, c };
+    }
+
+    function placeStone(r, c) {
+      const p    = current;
+      const type = selType[p];
+
+      if (type === '90' && must70[p]) {
+        setStatus('90%石の次は必ず70%石！');
+        return;
+      }
+
+      board[r][c] = { player: p, type, obs: null };
+      must70[p] = (type === '90');
+
+      // Switch turn
+      current = current === 1 ? 2 : 1;
+      if (must70[current]) selType[current] = '70';
+
+      hoverCell = null;
+      syncUI();
+      render();
+      setStatus(`Player ${current}（${current === 1 ? '黒' : '白'}）の番です`);
+    }
+
+    // ===== Observation =====
+    window.observe = (player) => {
+      if (gameOver || busy || tokens[player] <= 0) return;
+      tokens[player]--;
+      busy = true;
+      canvas.classList.add('no-cursor');
+      syncUI();
+
+      // Collapse each stone
+      const collapsed = board.map(row => row.map(cell => {
+        if (!cell) return null;
+        const prob     = cell.type === '90' ? 0.9 : 0.7;
+        const ownColor = cell.player === 1 ? 'black' : 'white';
+        const oppColor = cell.player === 1 ? 'white' : 'black';
+        return Math.random() < prob ? ownColor : oppColor;
+      }));
+
+      // Check wins
+      const blackWin = findWin(collapsed, 'black');
+      const whiteWin = findWin(collapsed, 'white');
+
+      // Animate flash → reveal
+      let step = 0;
+      const flash = setInterval(() => {
+        step++;
+        ctx.globalAlpha = step % 2 === 0 ? 1.0 : 0.4;
+        drawBoard();
+        ctx.globalAlpha = 1.0;
+
+        if (step >= 6) {
+          clearInterval(flash);
+          ctx.globalAlpha = 1.0;
+
+          // Apply collapsed colors
+          for (let r = 0; r < BS; r++) {
+            for (let c = 0; c < BS; c++) {
+              if (board[r][c]) board[r][c].obs = collapsed[r][c];
+            }
+          }
+
+          if (blackWin || whiteWin) {
+            // Winner!
+            gameOver = true;
+            let winner;
+            if (blackWin && whiteWin) {
+              // Both 5-in-a-row → observer wins
+              winner = player;
+            } else {
+              winner = blackWin ? 1 : 2;
+            }
+
+            render(blackWin ? blackWin.cells : null, whiteWin ? whiteWin.cells : null);
+            const name = winner === 1 ? '黒（Player 1）' : '白（Player 2）';
+            showOverlay(
+              winner === player ? `🎉 ${name} の勝利！` : `🎉 ${name} の勝利！`,
+              `${name}が五目を揃えました`,
+              winner === 1 ? '#222' : '#f5f5f5',
+              winner === 1 ? '#fff' : '#111'
+            );
+            setStatus(`🎉 Player ${winner}（${winner === 1 ? '黒' : '白'}）の勝利！`, true);
+            syncUI();
+          } else {
+            // No win — show for 2.5s then reset
+            render();
+            setStatus('五目がありませんでした…');
+
+            setTimeout(() => {
+              for (let r = 0; r < BS; r++) {
+                for (let c = 0; c < BS; c++) {
+                  if (board[r][c]) board[r][c].obs = null;
+                }
+              }
+              busy = false;
+              canvas.classList.remove('no-cursor');
+              syncUI();
+              render();
+              setStatus(`Player ${current}（${current === 1 ? '黒' : '白'}）の番です`);
+            }, 2500);
+          }
+        }
+      }, 130);
+    };
+
+    function findWin(collapsed, color) {
+      const dirs = [[0,1],[1,0],[1,1],[1,-1]];
+      for (let r = 0; r < BS; r++) {
+        for (let c = 0; c < BS; c++) {
+          if (collapsed[r][c] !== color) continue;
+          for (const [dr, dc] of dirs) {
+            const cells = [[r, c]];
+            for (let i = 1; i < 5; i++) {
+              const nr = r + dr*i, nc = c + dc*i;
+              if (nr < 0 || nr >= BS || nc < 0 || nc >= BS) break;
+              if (collapsed[nr][nc] !== color) break;
+              cells.push([nr, nc]);
+            }
+            if (cells.length >= 5) return { color, cells };
+          }
+        }
+      }
+      return null;
+    }
+
+    // ===== Overlay =====
+    function showOverlay(msg, sub, bgColor, textColor) {
+      const el = document.getElementById('obs-overlay');
+      el.style.background = `rgba(0,0,0,0.75)`;
+      const msgEl = document.getElementById('obs-msg');
+      const subEl = document.getElementById('obs-sub');
+      msgEl.textContent = msg;
+      msgEl.style.color = textColor || '#fff';
+      subEl.textContent = sub || '';
+      el.classList.add('show');
+
+      // Click to dismiss
+      el.onclick = () => el.classList.remove('show');
+    }
+
+    function hideOverlay() {
+      document.getElementById('obs-overlay').classList.remove('show');
+    }
+
+    // ===== Rendering =====
+    function render(blackWinCells, whiteWinCells) {
+      drawBoard();
+      drawStones(blackWinCells, whiteWinCells);
+      drawHover();
+    }
+
+    function drawBoard() {
+      // Board background (wood)
+      const grad = ctx.createLinearGradient(0, 0, CSIZE, CSIZE);
+      grad.addColorStop(0, '#c8902a');
+      grad.addColorStop(0.5, '#d4a040');
+      grad.addColorStop(1, '#bf8820');
+      ctx.fillStyle = grad;
+      roundRect(0, 0, CSIZE, CSIZE, 8);
+      ctx.fill();
+
+      // Grid
+      ctx.strokeStyle = '#7a5010';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < BS; i++) {
+        const x = PAD + i * CELL;
+        const y = PAD + i * CELL;
+        ctx.beginPath(); ctx.moveTo(x, PAD); ctx.lineTo(x, PAD + (BS-1)*CELL); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(PAD, y); ctx.lineTo(PAD + (BS-1)*CELL, y); ctx.stroke();
+      }
+
+      // Star points
+      ctx.fillStyle = '#7a5010';
+      [[3,3],[3,11],[7,7],[11,3],[11,11]].forEach(([r, c]) => {
+        ctx.beginPath();
+        ctx.arc(PAD + c*CELL, PAD + r*CELL, 3.5, 0, Math.PI*2);
+        ctx.fill();
+      });
+    }
+
+    function drawStones(blackWinCells, whiteWinCells) {
+      for (let r = 0; r < BS; r++) {
+        for (let c = 0; c < BS; c++) {
+          const stone = board[r][c];
+          if (!stone) continue;
+
+          const x = PAD + c * CELL;
+          const y = PAD + r * CELL;
+
+          const isWin = (
+            (blackWinCells && blackWinCells.some(([wr,wc]) => wr===r && wc===c)) ||
+            (whiteWinCells && whiteWinCells.some(([wr,wc]) => wr===r && wc===c))
+          );
+
+          drawStone(x, y, stone, isWin, false);
+        }
+      }
+    }
+
+    function drawHover() {
+      if (!hoverCell) return;
+      const { r, c } = hoverCell;
+      const x = PAD + c * CELL;
+      const y = PAD + r * CELL;
+      const fakeStone = { player: current, type: selType[current], obs: null };
+      drawStone(x, y, fakeStone, false, true);
+    }
+
+    function drawStone(x, y, stone, isWin, isHover) {
+      ctx.save();
+      if (isHover) ctx.globalAlpha = 0.45;
+
+      // Shadow
+      ctx.shadowColor = 'rgba(0,0,0,0.55)';
+      ctx.shadowBlur = 8;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 3;
+
+      ctx.beginPath();
+      ctx.arc(x, y, R, 0, Math.PI*2);
+
+      if (stone.obs) {
+        // Collapsed / observed
+        if (stone.obs === 'black') {
+          const g = ctx.createRadialGradient(x - R*0.3, y - R*0.3, R*0.05, x, y, R);
+          g.addColorStop(0, '#555');
+          g.addColorStop(1, '#000');
+          ctx.fillStyle = g;
+        } else {
+          const g = ctx.createRadialGradient(x - R*0.3, y - R*0.3, R*0.05, x, y, R);
+          g.addColorStop(0, '#fff');
+          g.addColorStop(1, '#c0c0c0');
+          ctx.fillStyle = g;
+        }
+      } else {
+        // Quantum / uncertain
+        if (stone.player === 1) {
+          const g = ctx.createRadialGradient(x - R*0.3, y - R*0.3, R*0.05, x, y, R);
+          if (stone.type === '90') {
+            g.addColorStop(0, '#4a4a4a');
+            g.addColorStop(1, '#0a0a0a');
+          } else {
+            g.addColorStop(0, '#7a7a7a');
+            g.addColorStop(1, '#3a3a3a');
+          }
+          ctx.fillStyle = g;
+        } else {
+          const g = ctx.createRadialGradient(x - R*0.3, y - R*0.3, R*0.05, x, y, R);
+          if (stone.type === '90') {
+            g.addColorStop(0, '#ffffff');
+            g.addColorStop(1, '#c8c8c8');
+          } else {
+            g.addColorStop(0, '#d8d8d8');
+            g.addColorStop(1, '#909090');
+          }
+          ctx.fillStyle = g;
+        }
+      }
+      ctx.fill();
+
+      // Reset shadow
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+
+      // Win highlight ring
+      if (isWin) {
+        ctx.beginPath();
+        ctx.arc(x, y, R * 0.55, 0, Math.PI*2);
+        ctx.strokeStyle = '#ff3030';
+        ctx.lineWidth = 2.5;
+        ctx.stroke();
+      }
+
+      // Probability label (uncertain only)
+      if (!stone.obs && !isHover) {
+        const textColor = stone.player === 1 ? 'rgba(220,220,220,0.9)' : 'rgba(30,30,30,0.85)';
+        ctx.fillStyle = textColor;
+        ctx.font = `bold ${Math.round(R * 0.65)}px -apple-system, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(stone.type + '%', x, y);
+      } else if (isHover) {
+        // Show ? on hover
+        const textColor = stone.player === 1 ? 'rgba(220,220,220,0.9)' : 'rgba(30,30,30,0.85)';
+        ctx.fillStyle = textColor;
+        ctx.font = `bold ${Math.round(R * 0.8)}px -apple-system, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('?', x, y);
+      }
+
+      ctx.restore();
+    }
+
+    function roundRect(x, y, w, h, r) {
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + w - r, y);
+      ctx.arcTo(x + w, y, x + w, y + r, r);
+      ctx.lineTo(x + w, y + h - r);
+      ctx.arcTo(x + w, y + h, x + w - r, y + h, r);
+      ctx.lineTo(x + r, y + h);
+      ctx.arcTo(x, y + h, x, y + h - r, r);
+      ctx.lineTo(x, y + r);
+      ctx.arcTo(x, y, x + r, y, r);
+      ctx.closePath();
+    }
+
+    // ===== Start =====
+    window.restart = restart;
+    restart();
+  })();
+  </script>
+</body>
+</html>
