@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.baton.botan-deploy</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>/Users/c3dev/.openclaw/workspace/tools/auto-deploy/deploy-watch.sh</string>
+    </array>
+    <key>StartInterval</key>
+    <integer>120</integer>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/c3dev/.openclaw/deploy-watch.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/c3dev/.openclaw/deploy-watch.log</string>
+</dict>
+</plist>
