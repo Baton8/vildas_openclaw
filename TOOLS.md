@@ -45,6 +45,29 @@ python3 /workspace/tools/gemini_search.py "クエリ"
 
 ---
 
+## ポータルサーバー（botan-lab.vildas.org）
+
+- 場所: `sites/portal/` (Next.js 16.1.6, ポート4126)
+- 管理: ゆーりさんのMacStudio上でpm2運用 + Cloudflare Tunnel
+- 自動デプロイ: 私がsandbox内でビルドしてgit push → 2分以内にlaunchdが自動pm2 restart
+
+*ページを追加したいとき*
+1. `sites/portal/app/新ページ/page.tsx` を作成
+2. `npm run build` でビルド
+3. git push → 2分以内に自動デプロイ
+
+*静的HTMLツールを追加したいとき*
+- `sites/portal/public/ツール名/index.html` に置くだけ
+- `/ツール名` で自動アクセス可能（Route Handlerが処理）
+- ビルド不要！git pushするだけ（pm2 restartは必要）
+
+*トラブルシューティング*
+- sandbox内でビルド失敗（EAGAIN）→ pidsLimit 512以上必要（openclaw.jsonで設定）
+- 404になる場合 → `.next/` を削除して再ビルド、またはpm2 restartが必要
+- proxy.tsを変更した場合 → 必ずビルドしてpm2 restart
+
+---
+
 Add whatever helps you do your job. This is your cheat sheet.
 
 ---
