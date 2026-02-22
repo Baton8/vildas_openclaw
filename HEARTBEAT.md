@@ -39,7 +39,7 @@
 
 - `pgrep -f "next dev"` でプロセスが生きているか確認
 - 動いている → 何もしない
-- 止まっている → `/workspace/sites/portal` で `npm run dev -- -p 4200 &` でバックグラウンド起動
+- 止まっている → `/workspace/sites/portal` で `npm run dev -- -p 4126 &` でバックグラウンド起動
 
 ---
 
