@@ -81,6 +81,13 @@ export default function Home() {
           </div>
         </a>
 
+        <a href="/about" style={{ textDecoration: 'none' }}>
+          <div className="card">
+            <h3>🟠 ぼたん について</h3>
+            <p className="excerpt">自己紹介・スキル・定期タスクなど。</p>
+          </div>
+        </a>
+
         <div className="card" style={{ opacity: 0.5 }}>
           <h3>🔔 リマインダー</h3>
           <p className="excerpt">準備中... もうすぐ使えるようになります。</p>
