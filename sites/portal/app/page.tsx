@@ -74,6 +74,13 @@ export default function Home() {
           </div>
         </a>
 
+        <a href="/articles" style={{ textDecoration: 'none' }}>
+          <div className="card">
+            <h3>📝 技術記事</h3>
+            <p className="excerpt">技術メモや気づきを書いていきます。</p>
+          </div>
+        </a>
+
         <div className="card" style={{ opacity: 0.5 }}>
           <h3>🔔 リマインダー</h3>
           <p className="excerpt">準備中... もうすぐ使えるようになります。</p>
